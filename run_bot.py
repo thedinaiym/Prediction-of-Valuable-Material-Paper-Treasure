@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict
 import aiofiles 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 from tabulate import tabulate
 import os
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Config:
     BOT_TOKEN = '7792128129:AAE5dIQdUavz4aDPGBCOiyJ9A6sL_FjqkNY'
+
 
 async def load_json_data(file_path: str) -> List[Dict]:
     try:
@@ -116,11 +117,28 @@ async def cmd_nbkr_gold(message: Message):
     )
 
 
+async def cmd_predict(message: Message):
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Перейти к прогнозу",
+                    url="https://prediction-of-valuable-material-paper-treasure-edfnsq6aimbjjkt.streamlit.app/"
+                )
+            ]
+        ]
+    )
+    await message.answer(
+        "Перейдите по кнопке ниже, чтобы сделать прогноз:",
+        reply_markup=keyboard
+    )
+
 
 async def cmd_start(message: Message):
     await message.answer(
         "Привет! Используйте /kyrgyz_gold, /nbkr_gold для получения данных о золотых слитках.\n"
-        "Данные будут показаны за последнюю доступную дату."
+        "Данные будут показаны за последнюю доступную дату.\n"
+        "Также вы можете использовать /predict для получения прогноза."
     )
 
 async def main():
@@ -130,6 +148,7 @@ async def main():
     dp.message.register(cmd_start, Command(commands=['start']))
     dp.message.register(cmd_kyrgyz_gold, Command(commands=['kyrgyz_gold']))
     dp.message.register(cmd_nbkr_gold, Command(commands=['nbkr_gold']))
+    dp.message.register(cmd_predict, Command(commands=['predict']))
 
     logger.info('Бот запущен')
 
@@ -145,9 +164,6 @@ if __name__ == '__main__':
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info('Бот остановлен')
-        
-        
-        
-        
+
         
         
