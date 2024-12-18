@@ -7,6 +7,7 @@ from demir import demir
 from mbank import mbank
 from optima import optima
 
+
 def main():
     demir_url = 'https://demirbank.kg/ru'
     mbank_url = 'https://mbank.kg/'
@@ -23,8 +24,8 @@ def main():
     combined_df = pd.concat([demir_df, mbank_df, optima_df], ignore_index=True)
  
     today_date = datetime.now().strftime('%Y-%m-%d') 
-    filename = f'combined_data_{today_date}.xlsx'
-    combined_df.to_excel(filename, index=False)
+    filename = f'combined_data_{today_date}.csv'
+    combined_df.to_csv(filename, index=False)
     print(f"Data saved to {filename}")
 
 if __name__ == '__main__':

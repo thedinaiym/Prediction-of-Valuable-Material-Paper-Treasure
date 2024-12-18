@@ -1,5 +1,8 @@
 import pandas as pd
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
+import json 
 
 def mbank(url):
     response = requests.get(url)

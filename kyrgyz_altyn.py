@@ -1,18 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-import time
-from datetime import datetime
 import os
+from datetime import datetime
 
 class GoldPriceScraper:
     def __init__(self, url='https://ru.kyrgyzaltyn.kg/gold_bars/', 
-                 json_filename='kyrgyz_gold.json', 
-                 check_interval=60):
-
+                 json_filename='data/kyrgyz_gold.json'):
         self.url = url
         self.json_filename = json_filename
-        self.check_interval = check_interval
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
@@ -67,33 +63,32 @@ class GoldPriceScraper:
         
         existing_data.sort(key=lambda x: datetime.strptime(x["Дата"], "%d.%m.%Y"), reverse=True)
         
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(self.json_filename), exist_ok=True)
+        
         with open(self.json_filename, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=4)
         
         print(f"Обновлено записей: {len(new_prices)}, Всего записей: {len(existing_data)}")
 
     def run(self):
-        while True:
-            try:
-                print(f"[{datetime.now()}] Проверка данных...")
+        try:
+            print(f"[{datetime.now()}] Проверка данных...")
+            
+            response = requests.get(self.url, headers=self.headers)
+            
+            if response.status_code == 200:
+                new_prices = self.extract_gold_prices(response.content)
                 
-                response = requests.get(self.url, headers=self.headers)
-                
-                if response.status_code == 200:
-                    new_prices = self.extract_gold_prices(response.content)
-                    
-                    if new_prices:
-                        self.merge_and_save_data(new_prices)
-                    else:
-                        print("Новых данных не найдено.")
+                if new_prices:
+                    self.merge_and_save_data(new_prices)
                 else:
-                    print(f'Ошибка при запросе страницы: {response.status_code}')
-                
-                time.sleep(self.check_interval)
-                
-            except Exception as e:
-                print(f"Произошла ошибка: {e}")
-                time.sleep(self.check_interval)
+                    print("Новых данных не найдено.")
+            else:
+                print(f'Ошибка при запросе страницы: {response.status_code}')
+        
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
 
 if __name__ == "__main__":
     scraper = GoldPriceScraper()
